@@ -144,7 +144,14 @@ const loginWithToken = async (req, res, next) => {
 
         const existingUser = await User.findOne({ _id: userId });
 
-        return res.status(200).json({ user: existingUser });
+        return res.status(200).json({
+            user: {
+                id: existingUser.id, username: existingUser.username, email: existingUser.email,
+                role: existingUser.role, activated: existingUser.activated, citizen: existingUser.citizen,
+                address: existingUser.address, phone: existingUser.phone, avatar: existingUser.avatar,
+
+            }
+        });
     } catch (error) {
         return res.status(401).send({ message: 'Invalid authorization token' });
     }

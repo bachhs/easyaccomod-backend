@@ -7,7 +7,7 @@ const createPlace = async (req, res, next) => {
     let user;
     try {
         user = await User.findOne({ _id: req.userData.userId });
-        if (user.role == 'renter' || (user.role == 'owner' && !user.activated)) {
+        if (user.role === 'renter' || (user.role === 'owner' && !user.activated)) {
             res.status(403).send({ message: 'You are not allowed to post new place.' });
             return;
         }
@@ -40,7 +40,7 @@ const createPlace = async (req, res, next) => {
         return;
     }
 
-    res.status(201).json({ place: createdPlace._id });
+    res.status(201).json({ placeId: createdPlace._id });
 }
 
 exports.createPlace = createPlace;
