@@ -5,7 +5,6 @@ const mongoose = require('mongoose');
 
 const usersRoutes = require('./routes/user.route');
 const placesRoutes = require('./routes/place.route');
-const Role = require("./models/role.model");
 
 const app = express();
 
@@ -29,44 +28,7 @@ mongoose
         app.listen(PORT, () => {
             console.log(`Server is running on port ${PORT}.`);
         });
-        initial();
     })
     .catch(err => {
         console.log(err);
     });
-
-const initial = () => {
-    Role.estimatedDocumentCount((err, count) => {
-        if (!err && count === 0) {
-            new Role({
-                name: 'renter'
-            }).save(err => {
-                if (err) {
-                    console.log("error", err);
-                }
-
-                console.log("added 'renter' to roles collection");
-            });
-
-            new Role({
-                name: "owner"
-            }).save(err => {
-                if (err) {
-                    console.log("error", err);
-                }
-
-                console.log("added 'owner' to roles collection");
-            });
-
-            new Role({
-                name: "admin"
-            }).save(err => {
-                if (err) {
-                    console.log("error", err);
-                }
-
-                console.log("added 'admin' to roles collection");
-            });
-        }
-    });
-}
