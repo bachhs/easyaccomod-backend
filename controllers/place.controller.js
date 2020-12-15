@@ -3,6 +3,25 @@ const { validationResult } = require('express-validator');
 const User = require('../models/user.model');
 const Place = require('../models/place.model');
 
+const getPlaceById = async (req, res, next) => {
+    const placeId = req.params.pid;
+
+    let place;
+    try {
+        place = await Place.findById(placeId);
+    } catch (err) {
+        res.status(500).send({ message: 'Something went wrong, could not find a place.' });
+        return;
+    }
+
+    if (!place) {
+        res.status(404).send({ message: 'Could not find place for the provided id.' })
+        return;
+    }
+
+    res.json({ place: place.toObject({ getters: true }) });
+}
+
 const createPlace = async (req, res, next) => {
     let user;
     try {
@@ -18,6 +37,7 @@ const createPlace = async (req, res, next) => {
     }
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+        console.log(errors);
         res.status(422).send({ message: 'Invalid inputs passed, please check your data.' });
         return;
     }
@@ -43,4 +63,5 @@ const createPlace = async (req, res, next) => {
     res.status(201).json({ placeId: createdPlace._id });
 }
 
+exports.getPlaceById = getPlaceById;
 exports.createPlace = createPlace;

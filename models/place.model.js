@@ -5,10 +5,10 @@ const Schema = mongoose.Schema;
 
 const placeSchema = new Schema({
     title: { type: String, required: true },
-    address: { type: String },
+    address: { type: String, required: true },
     location: {
-        lat: { type: Number },
-        lng: { type: Number }
+        lat: { type: Number, required: true },
+        lng: { type: Number, required: true }
     },
     type: { type: String, enum: ['Phòng trọ', 'Chung cư', 'Nhà nguyên căn'], required: true },
     room: { type: Number, required: true },
@@ -29,7 +29,5 @@ const placeSchema = new Schema({
     endDate: { type: Date, required: true },
     creator: { type: mongoose.Types.ObjectId, required: true, ref: 'User' }
 });
-
-placeSchema.plugin(uniqueValidator);
 
 module.exports = mongoose.model('Place', placeSchema);
