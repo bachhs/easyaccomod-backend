@@ -6,9 +6,10 @@ const Place = require('../models/place.model');
 const getPlaceById = async (req, res, next) => {
     const placeId = req.params.pid;
 
-    let place;
+    let place, creator;
     try {
         place = await Place.findById(placeId);
+        creator = await User.findById(place.creator);
     } catch (err) {
         res.status(500).send({ message: 'Something went wrong, could not find a place.' });
         return;
@@ -19,7 +20,15 @@ const getPlaceById = async (req, res, next) => {
         return;
     }
 
-    res.json({ place: place.toObject({ getters: true }) });
+    res.json(
+        {
+            place: place,
+            creator: {
+                username: creator.username,
+                phone: creator.phone,
+                avatar: creator.avatar
+            }
+        });
 }
 
 const createPlace = async (req, res, next) => {
