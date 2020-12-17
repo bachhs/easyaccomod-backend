@@ -24,7 +24,10 @@ const getPlaceById = async (req, res, next) => {
         {
             place: place,
             creator: {
+                _id: creator._id,
                 username: creator.username,
+                address: creator.address,
+                email: creator.email,
                 phone: creator.phone,
                 avatar: creator.avatar
             }
