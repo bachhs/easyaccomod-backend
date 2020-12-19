@@ -6,6 +6,8 @@ const auth = require('../middleware/auth');
 
 const router = express.Router();
 
+router.get('/', placesController.getPlaces);
+
 router.get('/:pid', placesController.getPlaceById);
 
 router.use(auth);

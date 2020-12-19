@@ -3,6 +3,39 @@ const { validationResult } = require('express-validator');
 const User = require('../models/user.model');
 const Place = require('../models/place.model');
 
+const getPlaces = async (req, res, next) => {
+    let places;
+    try {
+        places = await Place.find().populate('creator');
+    }
+    catch {
+        res.status(404).send(
+            'Co khong giu mat dung tim'
+        );
+    }
+    res.json(places.map(place => {
+        return {
+            id: place._id,
+            title: place.title,
+            createdDate: place._id.getTimestamp(),
+            description: place.description,
+            address: place.address,
+            price: place.price,
+            type: place.type,
+            image: place.images[0],
+            star: 4.5,
+            views: 100,
+            area: place.area,
+            creator: {
+                username: place.creator.username,
+                avatar: place.creator.avatar,
+                id: place.creator._id
+            }
+        }
+    })
+    );
+}
+
 const getPlaceById = async (req, res, next) => {
     const placeId = req.params.pid;
 
@@ -75,5 +108,6 @@ const createPlace = async (req, res, next) => {
     res.status(201).json({ placeId: createdPlace._id });
 }
 
+exports.getPlaces = getPlaces;
 exports.getPlaceById = getPlaceById;
 exports.createPlace = createPlace;
