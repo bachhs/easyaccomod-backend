@@ -13,27 +13,28 @@ const getPlaces = async (req, res, next) => {
             'Co khong giu mat dung tim'
         );
     }
-    res.json(places.map(place => {
-        return {
-            id: place._id,
-            title: place.title,
-            createdDate: place._id.getTimestamp(),
-            description: place.description,
-            address: place.address,
-            price: place.price,
-            type: place.type,
-            image: place.images[0],
-            star: 4.5,
-            views: 100,
-            area: place.area,
-            creator: {
-                username: place.creator.username,
-                avatar: place.creator.avatar,
-                id: place.creator._id
+    res.json({
+        places: places.map(place => {
+            return {
+                id: place._id,
+                title: place.title,
+                createdDate: place._id.getTimestamp(),
+                description: place.description,
+                address: place.address,
+                price: place.price,
+                type: place.type,
+                image: place.images[0],
+                star: 4.5,
+                views: 100,
+                area: place.area,
+                creator: {
+                    username: place.creator.username,
+                    avatar: place.creator.avatar,
+                    id: place.creator._id
+                }
             }
-        }
-    })
-    );
+        })
+    });
 }
 
 const getPlaceById = async (req, res, next) => {
