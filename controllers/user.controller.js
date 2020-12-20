@@ -179,7 +179,7 @@ const getFavoriteList = async (req, res, next) => {
     }
 }
 
-const addFavorite = async (req, res, next) => {
+const updateFavorite = async (req, res, next) => {
     const { authorization } = req.headers;
 
     if (!authorization) {
@@ -193,13 +193,16 @@ const addFavorite = async (req, res, next) => {
 
         const { userId } = jwt.verify(accessToken, process.env.SECRET);
 
-        User.findOneAndUpdate(
-            { _id: userId },
-            { $push: { favorite: placeId } }
-        ).exec();
-        res.status(201).json({ message: "Added to favorite list" });
+        const existingUser = await User.findOne({ _id: userId });
+
+        if (existingUser.favorite.includes(placeId))
+            existingUser.favorite = existingUser.favorite.filter(item => item != placeId);
+        else
+            existingUser.favorite.push(placeId);
+        existingUser.save();
+        res.status(201).json({ message: "Updated favorite list" });
     } catch (error) {
-        return res.status(401).send({ message: 'Invalid authorization token' });
+        return res.status(500).send({ message: 'Cannot update favorite list' });
     }
 }
 
@@ -207,4 +210,4 @@ exports.register = register;
 exports.loginWithEmailAndPassword = loginWithEmailAndPassword;
 exports.loginWithToken = loginWithToken;
 exports.getFavoriteList = getFavoriteList;
-exports.addFavorite = addFavorite;
+exports.updateFavorite = updateFavorite;

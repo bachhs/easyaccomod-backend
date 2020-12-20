@@ -24,6 +24,6 @@ router.post('/login', usersController.loginWithEmailAndPassword);
 router.use(auth);
 
 router.get('/favorite', usersController.getFavoriteList);
-router.patch('/favorite', usersController.addFavorite);
+router.patch('/favorite', usersController.updateFavorite);
 
 module.exports = router;

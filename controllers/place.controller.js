@@ -4,9 +4,10 @@ const User = require('../models/user.model');
 const Place = require('../models/place.model');
 
 const getPlaces = async (req, res, next) => {
-    let places;
+    let places, placeCount;
     try {
         places = await Place.find().skip((req.query.page - 1) * 6).limit(6).populate('creator');
+        placeCount = await Place.estimatedDocumentCount();
     }
     catch {
         res.status(404).send(
@@ -14,6 +15,7 @@ const getPlaces = async (req, res, next) => {
         );
     }
     res.json({
+        placeCount: placeCount,
         places: places.map(place => {
             return {
                 id: place._id,
