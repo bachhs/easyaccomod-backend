@@ -157,7 +157,7 @@ const loginWithToken = async (req, res, next) => {
     }
 }
 
-const addFavorite = async (req, res, next) => {
+const getFavoriteList = async (req, res, next) => {
     const { authorization } = req.headers;
 
     if (!authorization) {
@@ -172,13 +172,32 @@ const addFavorite = async (req, res, next) => {
         const existingUser = await User.findOne({ _id: userId });
 
         return res.status(200).json({
-            user: {
-                id: existingUser.id, username: existingUser.username, email: existingUser.email,
-                role: existingUser.role, activated: existingUser.activated, citizen: existingUser.citizen,
-                address: existingUser.address, phone: existingUser.phone, avatar: existingUser.avatar,
-
-            }
+            favorite: existingUser.favorite
         });
+    } catch (error) {
+        return res.status(401).send({ message: 'Invalid authorization token' });
+    }
+}
+
+const addFavorite = async (req, res, next) => {
+    const { authorization } = req.headers;
+
+    if (!authorization) {
+        res.status(401).send({ message: 'Authorization token missing' });
+    }
+
+    const { placeId } = req.body;
+
+    try {
+        const accessToken = authorization.split(' ')[1];
+
+        const { userId } = jwt.verify(accessToken, process.env.SECRET);
+
+        User.findOneAndUpdate(
+            { _id: userId },
+            { $push: { favorite: placeId } }
+        ).exec();
+        res.status(201).json({ message: "Added to favorite list" });
     } catch (error) {
         return res.status(401).send({ message: 'Invalid authorization token' });
     }
@@ -187,4 +206,5 @@ const addFavorite = async (req, res, next) => {
 exports.register = register;
 exports.loginWithEmailAndPassword = loginWithEmailAndPassword;
 exports.loginWithToken = loginWithToken;
+exports.getFavoriteList = getFavoriteList;
 exports.addFavorite = addFavorite;
