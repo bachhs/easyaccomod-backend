@@ -157,6 +157,34 @@ const loginWithToken = async (req, res, next) => {
     }
 }
 
+const addFavorite = async (req, res, next) => {
+    const { authorization } = req.headers;
+
+    if (!authorization) {
+        res.status(401).send({ message: 'Authorization token missing' });
+    }
+
+    try {
+        const accessToken = authorization.split(' ')[1];
+
+        const { userId } = jwt.verify(accessToken, process.env.SECRET);
+
+        const existingUser = await User.findOne({ _id: userId });
+
+        return res.status(200).json({
+            user: {
+                id: existingUser.id, username: existingUser.username, email: existingUser.email,
+                role: existingUser.role, activated: existingUser.activated, citizen: existingUser.citizen,
+                address: existingUser.address, phone: existingUser.phone, avatar: existingUser.avatar,
+
+            }
+        });
+    } catch (error) {
+        return res.status(401).send({ message: 'Invalid authorization token' });
+    }
+}
+
 exports.register = register;
 exports.loginWithEmailAndPassword = loginWithEmailAndPassword;
 exports.loginWithToken = loginWithToken;
+exports.addFavorite = addFavorite;

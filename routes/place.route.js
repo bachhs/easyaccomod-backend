@@ -21,7 +21,7 @@ router.post(
         check('type').isIn(['Phòng trọ', 'Chung cư', 'Nhà nguyên căn']),
         check('room').isInt({ gt: 0 }),
         check('area').isNumeric({ gt: 0 }),
-        check('price').isNumeric({ gt: 0 })
+        check('price').isNumeric({ gt: 0 }),
     ],
     placesController.createPlace
 );

@@ -30,4 +30,12 @@ const placeSchema = new Schema({
     creator: { type: mongoose.Types.ObjectId, required: true, ref: 'User' }
 });
 
+placeSchema.set('toJSON', {
+    transform: function (doc, ret, options) {
+        ret.id = ret._id;
+        delete ret._id;
+        delete ret.__v;
+    }
+});
+
 module.exports = mongoose.model('Place', placeSchema);

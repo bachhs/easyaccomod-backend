@@ -6,7 +6,7 @@ const Place = require('../models/place.model');
 const getPlaces = async (req, res, next) => {
     let places;
     try {
-        places = await Place.find().populate('creator');
+        places = await Place.find().skip((req.query.page - 1) * 6).limit(6).populate('creator');
     }
     catch {
         res.status(404).send(
@@ -56,9 +56,9 @@ const getPlaceById = async (req, res, next) => {
 
     res.json(
         {
-            place: place,
+            place: place.toJSON(),
             creator: {
-                _id: creator._id,
+                id: creator._id,
                 username: creator.username,
                 address: creator.address,
                 email: creator.email,

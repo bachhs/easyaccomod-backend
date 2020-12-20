@@ -19,5 +19,6 @@ router.post(
 
 router.get('/login', usersController.loginWithToken);
 router.post('/login', usersController.loginWithEmailAndPassword);
+router.patch('/:uid', usersController.addFavorite);
 
 module.exports = router;
