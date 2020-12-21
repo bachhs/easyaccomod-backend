@@ -10,6 +10,8 @@ router.get('/', placesController.getPlaces);
 
 router.get('/:pid', placesController.getPlaceById);
 
+router.get('/:pid/review', placesController.getReviews);
+
 router.use(auth);
 
 router.post(
@@ -25,5 +27,7 @@ router.post(
     ],
     placesController.createPlace
 );
+
+router.post('/:pid/review', placesController.postReview);
 
 module.exports = router;

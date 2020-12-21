@@ -172,7 +172,10 @@ const getFavoriteList = async (req, res, next) => {
         const existingUser = await User.findOne({ _id: userId });
 
         return res.status(200).json({
-            favorite: existingUser.favorite
+            user: {
+                id: existingUser._id,
+                favorite: existingUser.favorite
+            }
         });
     } catch (error) {
         return res.status(401).send({ message: 'Invalid authorization token' });
@@ -199,7 +202,7 @@ const updateFavorite = async (req, res, next) => {
             existingUser.favorite = existingUser.favorite.filter(item => item != placeId);
         else
             existingUser.favorite.push(placeId);
-        existingUser.save();
+        await existingUser.save();
         res.status(201).json({ message: "Updated favorite list" });
     } catch (error) {
         return res.status(500).send({ message: 'Cannot update favorite list' });

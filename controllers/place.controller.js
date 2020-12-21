@@ -6,13 +6,15 @@ const Place = require('../models/place.model');
 const getPlaces = async (req, res, next) => {
     let places, placeCount;
     try {
-        places = await Place.find().skip((req.query.page - 1) * 6).limit(6).populate('creator');
+        places = await Place.find().skip((req.query.page - 1) * 6).limit(6).populate('creator', 'username avatar id');
+        console.log(places);
         placeCount = await Place.estimatedDocumentCount();
     }
     catch {
         res.status(404).send(
             'Co khong giu mat dung tim'
         );
+        return;
     }
     res.json({
         placeCount: placeCount,
@@ -111,6 +113,60 @@ const createPlace = async (req, res, next) => {
     res.status(201).json({ placeId: createdPlace._id });
 }
 
+const getReviews = async (req, res, next) => {
+    const placeId = req.params.pid;
+    if (!placeId) {
+        res.status(401).send({ message: 'Cannot get place ID' });
+        return;
+    }
+    try {
+        const place = await Place.findById(placeId).populate('reviews.creator', 'username avatar id');
+        res.status(200).json({
+            reviews: place.reviews.map(review => {
+                return {
+                    id: review._id,
+                    rating: review.rating,
+                    message: review.message,
+                    createdAt: review._id.getTimestamp(),
+                    creator: {
+                        username: review.creator.username,
+                        avatar: review.creator.avatar,
+                        id: review.creator._id
+                    }
+                }
+            })
+        });
+    }
+    catch (error) {
+        res.status(404).json({ message: 'Cannot find place' });
+    }
+}
+
+const postReview = async (req, res, next) => {
+    const placeId = req.params.pid;
+    const review = req.body.review;
+    if (!placeId) {
+        res.status(401).send({ message: 'Invalid place ID' });
+        return;
+    }
+    try {
+        place = await Place.findById(placeId);
+        let existingReview = place.reviews.filter(value => value.creator == review.creator);
+        if (existingReview.length !== 0) {
+            res.status(409).json({ message: 'Already reviewed' });
+            return;
+        }
+        place.reviews.push(review);
+        await place.save();
+        res.status(201).json({ message: 'Review Successfully' });
+    }
+    catch (error) {
+        res.status(404).json({ message: 'Cannot find place' });
+    }
+}
+
 exports.getPlaces = getPlaces;
 exports.getPlaceById = getPlaceById;
 exports.createPlace = createPlace;
+exports.getReviews = getReviews;
+exports.postReview = postReview;

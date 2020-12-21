@@ -22,7 +22,7 @@ app.use('/api/places', placesRoutes);
 const uri = process.env.DATABASE_URI;
 
 mongoose
-    .connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
+    .connect(uri, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: true })
     .then(() => {
         const PORT = process.env.PORT || 5000;
         app.listen(PORT, () => {

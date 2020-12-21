@@ -27,12 +27,18 @@ const placeSchema = new Schema({
     activated: { type: Boolean, required: true },
     available: { type: Boolean, default: true, required: true },
     endDate: { type: Date, required: true },
-    creator: { type: mongoose.Types.ObjectId, required: true, ref: 'User' }
+    creator: { type: mongoose.Types.ObjectId, required: true, ref: 'User' },
+    reviews: [{
+        creator: { type: mongoose.Types.ObjectId, required: true, ref: 'User' },
+        rating: { type: Number, required: true },
+        message: { type: String }
+    }]
 });
 
 placeSchema.set('toJSON', {
     transform: function (doc, ret, options) {
         ret.id = ret._id;
+        delete ret.reviews;
         delete ret._id;
         delete ret.__v;
     }
