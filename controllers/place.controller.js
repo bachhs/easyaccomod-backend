@@ -7,7 +7,6 @@ const getPlaces = async (req, res, next) => {
     let places, placeCount;
     try {
         places = await Place.find().skip((req.query.page - 1) * 6).limit(6).populate('creator', 'username avatar id');
-        console.log(places);
         placeCount = await Place.estimatedDocumentCount();
     }
     catch {
@@ -28,8 +27,8 @@ const getPlaces = async (req, res, next) => {
                 price: place.price,
                 type: place.type,
                 image: place.images[0],
-                star: 4.5,
-                views: 100,
+                star: place.star,
+                views: place.views,
                 area: place.area,
                 creator: {
                     username: place.creator.username,
@@ -57,7 +56,8 @@ const getPlaceById = async (req, res, next) => {
         res.status(404).send({ message: 'Could not find place for the provided id.' })
         return;
     }
-
+    place.views += 1;
+    place.save();
     res.json(
         {
             place: place.toJSON(),
@@ -87,7 +87,6 @@ const createPlace = async (req, res, next) => {
     }
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-        console.log(errors);
         res.status(422).send({ message: 'Invalid inputs passed, please check your data.' });
         return;
     }
@@ -105,7 +104,6 @@ const createPlace = async (req, res, next) => {
     try {
         await createdPlace.save();
     } catch (err) {
-        console.log(err);
         res.status(500).send({ message: 'Database Register failed, please try again later.' });
         return;
     }

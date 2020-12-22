@@ -48,7 +48,6 @@ const register = async (req, res, next) => {
     try {
         await createdUser.save();
     } catch (err) {
-        console.log(err);
         res.status(500).send({ message: 'Database Register failed, please try again later.' });
         return;
     }

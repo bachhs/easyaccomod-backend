@@ -16,9 +16,6 @@ app.get("/api", (req, res) => {
     res.json({ message: "Welcome to the howling abyss." });
 });
 
-app.use('/api/users', usersRoutes);
-app.use('/api/places', placesRoutes);
-
 const uri = process.env.DATABASE_URI;
 
 mongoose
@@ -32,3 +29,6 @@ mongoose
     .catch(err => {
         console.log(err);
     });
+
+app.use('/api/users', usersRoutes);
+app.use('/api/places', placesRoutes);

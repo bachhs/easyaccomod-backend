@@ -32,7 +32,18 @@ const placeSchema = new Schema({
         creator: { type: mongoose.Types.ObjectId, required: true, ref: 'User' },
         rating: { type: Number, required: true },
         message: { type: String }
-    }]
+    }],
+    views: { type: Number, required: true, default: 0 }
+});
+
+placeSchema.virtual('star').get(function () {
+    if (this.reviews.length === 0)
+        return 0;
+    if (this.reviews.length === 1)
+        return this.reviews[0].rating;
+    return this.reviews.
+        reduce((accumulator, currentValue) => accumulator.rating + currentValue.rating)
+        / this.reviews.length;
 });
 
 placeSchema.set('toJSON', {
