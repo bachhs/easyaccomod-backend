@@ -39,10 +39,8 @@ const placeSchema = new Schema({
 placeSchema.virtual('star').get(function () {
     if (this.reviews.length === 0)
         return 0;
-    if (this.reviews.length === 1)
-        return this.reviews[0].rating;
     return this.reviews.
-        reduce((accumulator, currentValue) => accumulator.rating + currentValue.rating)
+        reduce(((accumulator, currentValue) => accumulator + currentValue.rating), 0)
         / this.reviews.length;
 });
 

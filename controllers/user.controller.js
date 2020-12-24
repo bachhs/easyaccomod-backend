@@ -130,18 +130,8 @@ const loginWithEmailAndPassword = async (req, res, next) => {
 };
 
 const loginWithToken = async (req, res, next) => {
-    const { authorization } = req.headers;
-
-    if (!authorization) {
-        res.status(401).send({ message: 'Authorization token missing' });
-    }
-
     try {
-        const accessToken = authorization.split(' ')[1];
-
-        const { userId } = jwt.verify(accessToken, process.env.SECRET);
-
-        const existingUser = await User.findOne({ _id: userId });
+        const existingUser = await User.findOne({ _id: req.userData.userId });
 
         return res.status(200).json({
             user: {
@@ -156,17 +146,23 @@ const loginWithToken = async (req, res, next) => {
     }
 }
 
-const getFavoriteList = async (req, res, next) => {
-    const { authorization } = req.headers;
-
-    if (!authorization) {
-        res.status(401).send({ message: 'Authorization token missing' });
-    }
-
+const getUser = async (req, res, next) => {
     try {
-        const accessToken = authorization.split(' ')[1];
+        const userId = req.params.uid;
 
-        const { userId } = jwt.verify(accessToken, process.env.SECRET);
+        const existingUser = await User.findOne({ _id: userId });
+
+        return res.status(200).json({
+            user: existingUser
+        });
+    } catch (error) {
+        return res.status(401).send({ message: 'Cannot get user' });
+    }
+}
+
+const getFavoriteList = async (req, res, next) => {
+    try {
+        const userId = req.params.uid;
 
         const existingUser = await User.findOne({ _id: userId });
 
@@ -177,7 +173,7 @@ const getFavoriteList = async (req, res, next) => {
             }
         });
     } catch (error) {
-        return res.status(401).send({ message: 'Invalid authorization token' });
+        return res.status(401).send({ message: 'Invalid userID' });
     }
 }
 
@@ -211,5 +207,6 @@ const updateFavorite = async (req, res, next) => {
 exports.register = register;
 exports.loginWithEmailAndPassword = loginWithEmailAndPassword;
 exports.loginWithToken = loginWithToken;
+exports.getUser = getUser;
 exports.getFavoriteList = getFavoriteList;
 exports.updateFavorite = updateFavorite;

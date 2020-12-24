@@ -25,9 +25,11 @@
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "express-validator": "^6.7.0",
+    "http": "0.0.1-security",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.11.1",
-    "mongoose-unique-validator": "^2.0.3"
+    "mongoose-unique-validator": "^2.0.3",
+    "socket.io": "^3.0.4"
   },
   "devDependencies": {
     "nodemon": "^2.0.6"

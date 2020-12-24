@@ -18,12 +18,13 @@ router.post(
     usersController.register
 );
 
-router.get('/login', usersController.loginWithToken);
 router.post('/login', usersController.loginWithEmailAndPassword);
+router.get('/:uid/favorite', usersController.getFavoriteList);
 
 router.use(auth);
 
-router.get('/favorite', usersController.getFavoriteList);
+router.get('/login', usersController.loginWithToken);
+router.get('/:uid', usersController.getUser);
 router.patch('/favorite', usersController.updateFavorite);
 
 module.exports = router;

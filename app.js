@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 
 const usersRoutes = require('./routes/user.route');
 const placesRoutes = require('./routes/place.route');
+const chatRoutes = require('./routes/chat.route');
 
 const app = express();
 
@@ -21,14 +22,28 @@ const uri = process.env.DATABASE_URI;
 mongoose
     .connect(uri, { useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: true })
     .then(() => {
-        const PORT = process.env.PORT || 5000;
-        app.listen(PORT, () => {
-            console.log(`Server is running on port ${PORT}.`);
-        });
     })
     .catch(err => {
         console.log(err);
     });
 
+const PORT = process.env.PORT || 5000;
+var http = require('http').createServer(app);
+const io = require('socket.io')(http, {
+    cors: {
+        origin: '*',
+    }
+});
+
+http.listen(5000, () => {
+    console.log(`listening on ${PORT}`);
+});
+
+app.use(function (req, res, next) {
+    req.io = io;
+    next();
+});
+
 app.use('/api/users', usersRoutes);
 app.use('/api/places', placesRoutes);
+app.use('/api/chat', chatRoutes);
