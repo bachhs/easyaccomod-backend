@@ -27,5 +27,6 @@ router.use(auth);
 router.get('/login', usersController.loginWithToken);
 router.get('/:uid', usersController.getUser);
 router.patch('/favorite', usersController.updateFavorite);
+router.patch('/activate/:uid', usersController.activateUser);
 
 module.exports = router;

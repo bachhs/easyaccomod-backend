@@ -216,10 +216,30 @@ const updateFavorite = async (req, res, next) => {
     }
 }
 
+const activateUser = async (req, res, next) => {
+    const { userId } = req.userData;
+    const { uid } = req.params;
+    try {
+        const existingUser = await User.findOne({ _id: userId });
+        if (existingUser.role !== 'admin') {
+            res.status(403).json(`You cannot activate this user`);
+            return;
+        }
+        const requestingUser = await User.findOne({ _id: uid });
+        requestingUser.activated = true;
+        await requestingUser.save();
+        res.json({ message: 'Activated' });
+    }
+    catch {
+        res.status(500).json({ message: 'Cannot activate, please try again' });
+    };
+}
+
 exports.register = register;
 exports.loginWithEmailAndPassword = loginWithEmailAndPassword;
 exports.loginWithToken = loginWithToken;
 exports.getUser = getUser;
 exports.getUserList = getUserList;
+exports.activateUser = activateUser;
 exports.getFavoriteList = getFavoriteList;
 exports.updateFavorite = updateFavorite;
