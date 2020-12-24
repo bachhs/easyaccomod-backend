@@ -146,6 +146,18 @@ const loginWithToken = async (req, res, next) => {
     }
 }
 
+const getUserList = async (req, res, next) => {
+    try {
+        const users = await User.find();
+
+        res.status(200).json({
+            users: users.map(user => user.toJSON())
+        });
+    } catch (error) {
+        return res.status(401).send({ message: 'Cannot get user' });
+    }
+}
+
 const getUser = async (req, res, next) => {
     try {
         const userId = req.params.uid;
@@ -208,5 +220,6 @@ exports.register = register;
 exports.loginWithEmailAndPassword = loginWithEmailAndPassword;
 exports.loginWithToken = loginWithToken;
 exports.getUser = getUser;
+exports.getUserList = getUserList;
 exports.getFavoriteList = getFavoriteList;
 exports.updateFavorite = updateFavorite;

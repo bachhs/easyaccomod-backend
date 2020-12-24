@@ -36,7 +36,7 @@ const io = require('socket.io')(http, {
 });
 
 http.listen(5000, () => {
-    console.log(`listening on ${PORT}`);
+    console.log(`Listening on ${PORT}`);
 });
 
 app.use(function (req, res, next) {

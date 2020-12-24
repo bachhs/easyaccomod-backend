@@ -16,6 +16,17 @@ const userSchema = new Schema({
     password: { type: String, required: true },
 });
 
+userSchema.set('toJSON', {
+    transform: function (doc, ret, options) {
+        ret.id = ret._id;
+        delete ret.password;
+        delete ret.favorite;
+        delete ret.citizen;
+        delete ret._id;
+        delete ret.__v;
+    }
+});
+
 userSchema.plugin(uniqueValidator);
 
 module.exports = mongoose.model('User', userSchema);
