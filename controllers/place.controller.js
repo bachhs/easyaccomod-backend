@@ -163,7 +163,27 @@ const postReview = async (req, res, next) => {
     }
 }
 
+const activatePlace = async (req, res, next) => {
+    const { userId } = req.userData;
+    const { pid } = req.params;
+    try {
+        const existingUser = await User.findOne({ _id: userId });
+        if (existingUser.role !== 'admin') {
+            res.status(403).json(`You cannot activate this user`);
+            return;
+        }
+        const place = await Place.findOne({ _id: pid });
+        place.activated = true;
+        await place.save();
+        res.json({ message: 'Activated' });
+    }
+    catch {
+        res.status(500).json({ message: 'Cannot activate, please try again' });
+    };
+}
+
 exports.getPlaces = getPlaces;
+exports.activatePlace = activatePlace;
 exports.getPlaceById = getPlaceById;
 exports.createPlace = createPlace;
 exports.getReviews = getReviews;

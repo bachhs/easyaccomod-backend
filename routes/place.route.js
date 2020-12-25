@@ -29,5 +29,6 @@ router.post(
 );
 
 router.post('/:pid/review', placesController.postReview);
+router.patch('/:pid/activate', placesController.activatePlace);
 
 module.exports = router;
