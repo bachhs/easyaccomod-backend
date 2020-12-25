@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const User = require('../models/user.model');
+const Place = require('../models/place.model')
 
 const register = async (req, res, next) => {
     const errors = validationResult(req);
@@ -176,16 +177,73 @@ const getFavoriteList = async (req, res, next) => {
     try {
         const userId = req.params.uid;
 
-        const existingUser = await User.findOne({ _id: userId });
+        const existingUser = await User.findOne({ _id: userId })
+            .populate({
+                path: 'favorite',
+                populate: {
+                    path: 'creator',
+                    select: 'username avatar id'
+                }
+            })
 
         return res.status(200).json({
             user: {
                 id: existingUser._id,
-                favorite: existingUser.favorite
+                places: existingUser.favorite.map(place => {
+                    return {
+                        id: place._id,
+                        title: place.title,
+                        createdDate: place._id.getTimestamp(),
+                        description: place.description,
+                        address: place.address,
+                        price: place.price,
+                        type: place.type,
+                        image: place.images[0],
+                        star: place.star,
+                        views: place.views,
+                        area: place.area,
+                        creator: place.creator
+                    }
+                })
             }
         });
     } catch (error) {
-        return res.status(401).send({ message: 'Invalid userID' });
+        console.log(error);
+        return res.status(404).send({ message: 'Invalid userID' });
+    }
+}
+
+const getCreatedPlace = async (req, res, next) => {
+    try {
+        const userId = req.params.uid;
+
+        const places = await Place.find({ creator: userId })
+            .populate('creator', 'id username avatar');
+
+        return res.status(200).json({
+            user: {
+                id: userId,
+                places: places.map(place => {
+                    return {
+                        id: place._id,
+                        title: place.title,
+                        createdDate: place._id.getTimestamp(),
+                        description: place.description,
+                        address: place.address,
+                        price: place.price,
+                        type: place.type,
+                        image: place.images[0],
+                        star: place.star,
+                        views: place.views,
+                        area: place.area,
+                        creator: place.creator
+                    }
+                })
+            }
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(404).send({ message: 'Invalid userID' });
     }
 }
 
@@ -240,6 +298,7 @@ exports.loginWithEmailAndPassword = loginWithEmailAndPassword;
 exports.loginWithToken = loginWithToken;
 exports.getUser = getUser;
 exports.getUserList = getUserList;
+exports.getCreatedPlace = getCreatedPlace;
 exports.activateUser = activateUser;
 exports.getFavoriteList = getFavoriteList;
 exports.updateFavorite = updateFavorite;

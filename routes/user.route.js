@@ -21,6 +21,7 @@ router.post(
 router.post('/login', usersController.loginWithEmailAndPassword);
 router.get('/', usersController.getUserList);
 router.get('/:uid/favorite', usersController.getFavoriteList);
+router.get('/:uid/places', usersController.getCreatedPlace);
 
 router.use(auth);
 
