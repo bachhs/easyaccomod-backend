@@ -21,7 +21,6 @@ userSchema.set('toJSON', {
         ret.id = ret._id;
         delete ret.password;
         delete ret.favorite;
-        delete ret.citizen;
         delete ret._id;
         delete ret.__v;
     }

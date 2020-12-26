@@ -173,6 +173,41 @@ const getUser = async (req, res, next) => {
     }
 }
 
+const editUser = async (req, res, next) => {
+    let user;
+    const { uid } = req.params;
+    try {
+        user = await User.findOne({ _id: uid });
+        if (user.role !== 'admin' || req.userData.id !== uid) {
+            res.status(403).send({ message: 'You are not allowed to post new place.' });
+            return;
+        }
+    }
+    catch (err) {
+        res.status(500).send({ message: 'Authorization failed, please try again later.' })
+        return;
+    }
+
+    try {
+        const session = await User.startSession();
+        session.startTransaction();
+
+        const { username, citizen, address, phone } = req.body;
+        user.username = username; user.citizen = citizen;
+        user.address = address;
+        user.phone = phone;
+        await user.save();
+
+        session.endSession();
+        res.status(200).json({ message: 'Update successfully' });
+    }
+    catch (err) {
+        res.status(500).send({ message: 'Authorization failed, please try again later.' })
+        return;
+    }
+}
+
+
 const getFavoriteList = async (req, res, next) => {
     try {
         const userId = req.params.uid;
@@ -208,7 +243,6 @@ const getFavoriteList = async (req, res, next) => {
             }
         });
     } catch (error) {
-        console.log(error);
         return res.status(404).send({ message: 'Invalid userID' });
     }
 }
@@ -242,7 +276,6 @@ const getCreatedPlace = async (req, res, next) => {
             }
         });
     } catch (error) {
-        console.log(error);
         return res.status(404).send({ message: 'Invalid userID' });
     }
 }
@@ -297,6 +330,7 @@ exports.register = register;
 exports.loginWithEmailAndPassword = loginWithEmailAndPassword;
 exports.loginWithToken = loginWithToken;
 exports.getUser = getUser;
+exports.editUser = editUser;
 exports.getUserList = getUserList;
 exports.getCreatedPlace = getCreatedPlace;
 exports.activateUser = activateUser;

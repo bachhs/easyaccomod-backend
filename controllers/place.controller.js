@@ -114,6 +114,55 @@ const createPlace = async (req, res, next) => {
     res.status(201).json({ placeId: createdPlace._id });
 }
 
+const editPlace = async (req, res, next) => {
+    let user, place;
+    const { pid } = req.params;
+    try {
+        user = await User.findOne({ _id: req.userData.userId });
+        place = await Place.findOne({ _id: pid });
+        if (user.role !== 'admin' || user.id !== place.creator) {
+            res.status(403).send({ message: 'You are not allowed to post new place.' });
+            return;
+        }
+    }
+    catch (err) {
+        res.status(500).send({ message: 'Authorization failed, please try again later.' })
+        return;
+    }
+
+    try {
+        const session = await Place.startSession();
+        session.startTransaction();
+
+        const { title, type, room, area, price,
+            host, bathroom, kitchen, waterHeater, airconditioner, balcony,
+            electricPrice, waterPrice, description, endDate } = req.body;
+        place.title = title;
+        place.type = type;
+        place.room = room;
+        place.area = area;
+        place.price = price;
+        place.host = host;
+        place.bathroom = bathroom;
+        place.kitchen = kitchen;
+        place.waterHeater = waterHeater;
+        place.airconditioner = airconditioner;
+        place.balcony = balcony;
+        place.electricPrice = electricPrice;
+        place.waterPrice - waterPrice;
+        place.description = description;
+        place.endDate = endDate;
+        await place.save();
+
+        session.endSession();
+        res.status(200).json({ message: 'Update successfully' });
+    }
+    catch (err) {
+        res.status(500).send({ message: 'Authorization failed, please try again later.' })
+        return;
+    }
+}
+
 const getReviews = async (req, res, next) => {
     const placeId = req.params.pid;
     if (!placeId) {
@@ -206,6 +255,7 @@ const setAvailablePlace = async (req, res, next) => {
 
 exports.getPlaces = getPlaces;
 exports.activatePlace = activatePlace;
+exports.editPlace = editPlace;
 exports.setAvailablePlace = setAvailablePlace;
 exports.getPlaceById = getPlaceById;
 exports.createPlace = createPlace;
