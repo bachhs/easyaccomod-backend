@@ -6,7 +6,7 @@ const Place = require('../models/place.model');
 const getPlaces = async (req, res, next) => {
     let places, placeCount;
     try {
-        places = await Place.find().skip((req.query.page - 1) * 6).limit(6).populate('creator', 'username avatar id');
+        places = await Place.find().skip((req.query.page - 1) * 6).limit(6).populate('creator', 'username email avatar id');
         placeCount = await Place.estimatedDocumentCount();
     }
     catch {
@@ -23,6 +23,8 @@ const getPlaces = async (req, res, next) => {
                 title: place.title,
                 createdDate: place._id.getTimestamp(),
                 description: place.description,
+                activated: place.activated,
+                available: place.available,
                 address: place.address,
                 price: place.price,
                 type: place.type,
@@ -32,6 +34,7 @@ const getPlaces = async (req, res, next) => {
                 area: place.area,
                 creator: {
                     username: place.creator.username,
+                    email: place.creator.email,
                     avatar: place.creator.avatar,
                     id: place.creator._id
                 }
@@ -167,9 +170,9 @@ const activatePlace = async (req, res, next) => {
     const { userId } = req.userData;
     const { pid } = req.params;
     try {
-        const existingUser = await User.findOne({ _id: userId });
-        if (existingUser.role !== 'admin') {
-            res.status(403).json(`You cannot activate this user`);
+        const user = await User.findOne({ _id: userId });
+        if (user.role !== 'admin') {
+            res.status(403).json('You cannot activate this user');
             return;
         }
         const place = await Place.findOne({ _id: pid });
@@ -182,8 +185,28 @@ const activatePlace = async (req, res, next) => {
     };
 }
 
+const setAvailablePlace = async (req, res, next) => {
+    const { userId } = req.userData;
+    const { pid } = req.params;
+    try {
+        const user = await User.findOne({ _id: userId });
+        const place = await Place.findOne({ _id: pid });
+        if (!(user.role === 'admin' || place.creator !== user.id)) {
+            res.status(403).json('You cannot set available this place');
+            return;
+        }
+        place.available = false;
+        await place.save();
+        res.json({ message: 'Success' });
+    }
+    catch {
+        res.status(500).json({ message: 'Cannot activate, please try again' });
+    };
+}
+
 exports.getPlaces = getPlaces;
 exports.activatePlace = activatePlace;
+exports.setAvailablePlace = setAvailablePlace;
 exports.getPlaceById = getPlaceById;
 exports.createPlace = createPlace;
 exports.getReviews = getReviews;

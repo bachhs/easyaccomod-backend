@@ -19,15 +19,15 @@ router.post(
 );
 
 router.post('/login', usersController.loginWithEmailAndPassword);
-router.get('/', usersController.getUserList);
 router.get('/:uid/favorite', usersController.getFavoriteList);
 router.get('/:uid/places', usersController.getCreatedPlace);
-router.get('/:uid', usersController.getUser);
 
+router.get('/', usersController.getUserList);
 router.use(auth);
 
 router.get('/login', usersController.loginWithToken);
 router.patch('/favorite', usersController.updateFavorite);
+router.get('/:uid', usersController.getUser);
 router.patch('/:uid/activate', usersController.activateUser);
 
 module.exports = router;
