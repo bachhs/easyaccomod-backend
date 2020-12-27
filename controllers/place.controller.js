@@ -17,6 +17,8 @@ const getPlaces = async (req, res, next) => {
     const end = req.query.end * 1000000 || 20000000;
     const order = req.query.order === 'asc' ? '+' : '-';
     const page = req.query.page;
+    const available = req.query.page ? [1] : [1, 0];
+    const activated = req.query.page ? [1] : [1, 0];
     try {
         places = await Place.find({
             $or: [
@@ -28,7 +30,9 @@ const getPlaces = async (req, res, next) => {
             kitchen: { $in: kitchen },
             airconditioner: { $in: airconditioner },
             waterHeater: { $in: waterHeater },
-            price: { $gte: start, $lte: end }
+            price: { $gte: start, $lte: end },
+            available: { $in: available },
+            activated: { $in: activated },
         }).sort(order + orderBy).populate('creator', 'username email avatar id');
         if (orderBy === 'star')
             places.sort((a, b) => {

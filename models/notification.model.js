@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 
 const notificationsSchema = new Schema({
     type: { type: String, enum: ['ADMIN', 'ACTIVATED', 'UNAVAILABLE'], required: true },
-    place: { type: mongoose.Types.ObjectId, ref: 'Place' },
+    place: { type: mongoose.Types.ObjectId, ref: 'Place', required: true },
 });
 
 notificationsSchema.set('toJSON', {

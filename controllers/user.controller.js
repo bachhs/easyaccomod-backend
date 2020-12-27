@@ -54,16 +54,6 @@ const register = async (req, res, next) => {
         return;
     }
 
-    try {
-        const notification = new Notification({
-            type: 'ADMIN',
-            user: createdUser._id
-        });
-        await notification.save();
-    }
-    catch {
-    }
-
     let token;
     try {
         token = jwt.sign(
@@ -331,6 +321,7 @@ const activateUser = async (req, res, next) => {
         const requestingUser = await User.findOne({ _id: uid });
         requestingUser.activated = true;
         await requestingUser.save();
+        res.status(200).json({ message: 'Activated' });
     }
     catch {
         res.status(500).json({ message: 'Cannot activate, please try again' });
