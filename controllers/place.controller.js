@@ -2,12 +2,44 @@ const { validationResult } = require('express-validator');
 
 const User = require('../models/user.model');
 const Place = require('../models/place.model');
+const Notification = require('../models/notification.model');
 
 const getPlaces = async (req, res, next) => {
     let places, placeCount;
+    const keyword = req.query.q || '';
+    const type = req.query.type || ['Phòng trọ', 'Chung cư', 'Nhà nguyên căn'];
+    const bathroom = req.query.bathroom || ['Khép kín', 'Chung'];
+    const kitchen = req.query.kitchen || ['Khu bếp riêng', 'Khu bếp chung', 'Không nấu ăn'];
+    const airconditioner = req.query.airconditioner || [0, 1];
+    const waterHeater = req.query.waterHeater || [0, 1];
+    const orderBy = req.query.orderBy || '_id';
+    const start = req.query.start * 1000000 || 0;
+    const end = req.query.end * 1000000 || 20000000;
+    const order = req.query.order === 'asc' ? '+' : '-';
+    const page = req.query.page;
     try {
-        places = await Place.find().skip((req.query.page - 1) * 6).limit(6).populate('creator', 'username email avatar id');
-        placeCount = await Place.estimatedDocumentCount();
+        places = await Place.find({
+            $or: [
+                { title: { $regex: keyword, $options: "i" } },
+                { address: { $regex: keyword, $options: "i" } },
+            ],
+            type: { $in: type },
+            bathroom: { $in: bathroom },
+            kitchen: { $in: kitchen },
+            airconditioner: { $in: airconditioner },
+            waterHeater: { $in: waterHeater },
+            price: { $gte: start, $lte: end }
+        }).sort(order + orderBy).populate('creator', 'username email avatar id');
+        if (orderBy === 'star')
+            places.sort((a, b) => {
+                if (order === '-')
+                    return b.star - a.star;
+                return a.star - b.star;
+            });
+        placeCount = places.length;
+        const perPage = 6;
+        if (page)
+            places = places.slice((page - 1) * perPage, page * perPage);
     }
     catch {
         res.status(404).send(
@@ -111,6 +143,15 @@ const createPlace = async (req, res, next) => {
         return;
     }
 
+    try {
+        const notification = new Notification({
+            type: 'ADMIN',
+            place: createdPlace._id
+        });
+        await notification.save();
+    }
+    catch {
+    }
     res.status(201).json({ placeId: createdPlace._id });
 }
 
@@ -120,8 +161,8 @@ const editPlace = async (req, res, next) => {
     try {
         user = await User.findOne({ _id: req.userData.userId });
         place = await Place.findOne({ _id: pid });
-        if (user.role !== 'admin' || user.id !== place.creator) {
-            res.status(403).send({ message: 'You are not allowed to post new place.' });
+        if (!(user.role === 'admin' || place.creator.equals(user._id))) {
+            res.status(403).send({ message: 'You are not allowed to edit this place.' });
             return;
         }
     }
@@ -227,6 +268,15 @@ const activatePlace = async (req, res, next) => {
         const place = await Place.findOne({ _id: pid });
         place.activated = true;
         await place.save();
+        try {
+            const notification = new Notification({
+                type: 'ACTIVATED',
+                place: place._id
+            });
+            await notification.save();
+        }
+        catch {
+        }
         res.json({ message: 'Activated' });
     }
     catch {
@@ -246,6 +296,11 @@ const setAvailablePlace = async (req, res, next) => {
         }
         place.available = false;
         await place.save();
+        const notification = new Notification({
+            type: 'UNAVAILABLE',
+            place: place._id
+        });
+        await notification.save();
         res.json({ message: 'Success' });
     }
     catch {

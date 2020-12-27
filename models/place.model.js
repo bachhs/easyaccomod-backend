@@ -15,7 +15,7 @@ const placeSchema = new Schema({
     area: { type: Number, required: true },
     price: { type: Number, required: true },
     host: { type: Boolean, required: true },
-    bathroom: { type: String, required: true },
+    bathroom: { type: String, enum: ['Khép kín', 'Chung'], required: true },
     kitchen: { type: String, enum: ['Khu bếp riêng', 'Khu bếp chung', 'Không nấu ăn'], required: true },
     waterHeater: { type: Boolean, required: true },
     airconditioner: { type: Boolean, required: true },
@@ -52,7 +52,6 @@ placeSchema.set('toJSON', {
         delete ret._id;
         delete ret.__v;
     },
-
 });
 
 module.exports = mongoose.model('Place', placeSchema);

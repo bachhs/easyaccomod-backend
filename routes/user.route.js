@@ -20,11 +20,12 @@ router.post(
 
 router.post('/login', usersController.loginWithEmailAndPassword);
 router.get('/login', auth, usersController.loginWithToken);
+router.get('/notifications', auth, usersController.getNotifications);
 router.patch('/favorite', auth, usersController.updateFavorite);
 router.patch('/:uid/activate', auth, usersController.activateUser);
 router.get('/:uid/favorite', usersController.getFavoriteList);
 router.get('/:uid/places', usersController.getCreatedPlace);
-router.put('/:uid', usersController.editUser);
+router.put('/:uid', auth, usersController.editUser);
 router.get('/:uid', usersController.getUser);
 router.get('/', usersController.getUserList);
 

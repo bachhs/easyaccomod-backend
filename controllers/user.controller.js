@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 
 const User = require('../models/user.model');
 const Place = require('../models/place.model')
+const Notification = require('../models/notification.model')
 
 const register = async (req, res, next) => {
     const errors = validationResult(req);
@@ -51,6 +52,16 @@ const register = async (req, res, next) => {
     } catch (err) {
         res.status(500).send({ message: 'Database Register failed, please try again later.' });
         return;
+    }
+
+    try {
+        const notification = new Notification({
+            type: 'ADMIN',
+            user: createdUser._id
+        });
+        await notification.save();
+    }
+    catch {
     }
 
     let token;
@@ -174,12 +185,13 @@ const getUser = async (req, res, next) => {
 }
 
 const editUser = async (req, res, next) => {
-    let user;
+    let user, requestingUser;
     const { uid } = req.params;
     try {
         user = await User.findOne({ _id: uid });
-        if (user.role !== 'admin' || req.userData.id !== uid) {
-            res.status(403).send({ message: 'You are not allowed to post new place.' });
+        requestingUser = await User.findOne({ _id: req.userData.userId });
+        if (!(requestingUser.role === 'admin' || req.userData.userId == user._id)) {
+            res.status(403).send({ message: 'You are not able to edit user profile.' });
             return;
         }
     }
@@ -319,11 +331,57 @@ const activateUser = async (req, res, next) => {
         const requestingUser = await User.findOne({ _id: uid });
         requestingUser.activated = true;
         await requestingUser.save();
-        res.json({ message: 'Activated' });
     }
     catch {
         res.status(500).json({ message: 'Cannot activate, please try again' });
     };
+}
+
+const getNotifications = async (req, res, next) => {
+    const { userId } = req.userData;
+    let user;
+    try {
+        user = await User.findOne({ _id: userId });
+    }
+    catch {
+        res.status(401).json({ message: 'Authorization failed' });
+        return;
+    }
+
+    const notifications = await Notification
+        .find({ type: { $in: ['ACTIVATED', 'UNAVAILABLE'] } })
+        .populate('place');
+
+    let response = [];
+    notifications.forEach((notification) => {
+        if (notification.place.creator.equals(user._id) || user.favorite.includes(notification.place.id)) {
+            response.push({
+                id: notification._id,
+                type: notification.type,
+                place: notification.place.id,
+                title: notification.place.title
+            })
+        }
+    });
+
+    if (user.role === 'admin') {
+        const notifications = await Notification
+            .find({ type: { $in: ['ADMIN'] } }).populate('place');;
+        notifications.forEach((notification) => {
+            response.push({
+                id: notification._id,
+                type: notification.type,
+                place: notification.place.id,
+                title: notification.place.title
+            })
+        });
+    }
+
+    response.sort(function (a, b) {
+        return b.id - a.id;
+    });
+
+    res.status(200).json({ notifications: response });
 }
 
 exports.register = register;
@@ -335,4 +393,5 @@ exports.getUserList = getUserList;
 exports.getCreatedPlace = getCreatedPlace;
 exports.activateUser = activateUser;
 exports.getFavoriteList = getFavoriteList;
+exports.getNotifications = getNotifications;
 exports.updateFavorite = updateFavorite;
